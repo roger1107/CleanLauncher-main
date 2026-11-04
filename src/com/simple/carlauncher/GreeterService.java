@@ -1,0 +1,356 @@
+package com.simple.carlauncher;
+
+import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.media.AudioAttributes;
+import android.media.MediaPlayer;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
+/**
+ * Spoken welcome ~20 s after the car is switched on: greeting, current weather,
+ * seat-belt reminder, "pico y placa" on Wednesdays and "drive carefully".
+ *
+ * The phrases are pre-rendered clips (res/raw/v_*.mp3) because the head unit has no
+ * text-to-speech engine. The launcher is listed in /nwdappconfig/app/NaviSound.ini so the
+ * NWD kernel mixes this audio over the radio/music like navigation prompts.
+ */
+public class GreeterService extends Service {
+
+    private static final String TAG = "Greeter";
+    private static final long DELAY_MS = 20_000;
+    private static final long MIN_INTERVAL_MS = 60_000; // only skip duplicate wake signals
+
+    // MCU source ids (ApplicationList.xml "Source") of the last audio source before ACC off.
+    private static final int SRC_RADIO = 4, SRC_BT = -125, SRC_USB = -128;
+
+    private final Handler handler = new Handler();
+    private static GreeterService instance;
+
+    /** Speaks a sentence right now (voice alerts from other parts of the app: speed limit, rest). */
+    static void say(Context c, String text) {
+        GreeterService s = instance;
+        if (s == null || !Profile.voiceEnabled(s)) return;
+        s.handler.post(() -> s.speakTts(text, null));
+    }
+    private final List<String> queue = new ArrayList<>();
+    private final RadioClient radio = new RadioClient();
+    private final SoundClient sound = new SoundClient();
+    private MediaPlayer player;
+    private boolean waitingForPhone;
+    private boolean btPlaying;
+    // One pending restore at a time: boot and "ACC on" both ask for it a few seconds apart.
+    private final Runnable restore = this::restoreAudio;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        instance = this;
+        radio.bind(this);
+        sound.bind(this, () -> handler.post(() -> EqAuto.apply(this, sound)));
+        IntentFilter f = new IntentFilter();
+        f.addAction("com.nwd.action.ACTION_CHANGE_SOURCE");      // auto EQ: radio vs music curve
+        f.addAction("com.nwd.action.ACTION_VOLUME_STATE_CHANGE"); // auto EQ: loudness
+        f.addAction("com.nwd.action.ACTION_MCU_STATE_CHANGE"); // ACC off (3) / on (1)
+        f.addAction("com.bt.ACTION_A2DP_ESTABLISHED");
+        f.addAction("com.bt.ACTION_AVRCP_ESTABLISHED");
+        f.addAction("com.bt.ACTION_BT_MUSIC_PLAY");
+        f.addAction("com.bt.ACTION_BT_MUSIC_PAUSE");
+        f.addAction("com.simple.carlauncher.TEST_CAR_ON"); // adb test hook
+        registerReceiver(events, f);
+        // Right after boot, bring the last source back and greet. A plain restart of this app
+        // (update, crash) must not touch the audio.
+        if (android.os.SystemClock.elapsedRealtime() < 3 * 60_000) {
+            handler.postDelayed(restore, 4000);
+            schedule();
+        }
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY;
+    }
+
+    private final BroadcastReceiver events = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context c, Intent i) {
+            String a = i.getAction();
+            if ("com.nwd.action.ACTION_CHANGE_SOURCE".equals(a)) {
+                handler.postDelayed(() -> EqAuto.apply(GreeterService.this, sound), 1500);
+                return;
+            }
+            if ("com.nwd.action.ACTION_VOLUME_STATE_CHANGE".equals(a)) {
+                handler.postDelayed(() -> EqAuto.applyLoudness(GreeterService.this, sound), 300);
+                return;
+            }
+            if ("com.nwd.action.ACTION_MCU_STATE_CHANGE".equals(a)) {
+                int state = i.getByteExtra("extra_mcu_state", (byte) -1);
+                Log.d(TAG, "mcu_state=" + state);
+                if (state == 3) onCarOff();
+                else if (state == 1) onCarOn();
+            } else if ("com.simple.carlauncher.TEST_CAR_ON".equals(a)) {
+                onCarOn();
+            } else if ("com.bt.ACTION_BT_MUSIC_PAUSE".equals(a)) {
+                btPlaying = false;
+            } else if ("com.bt.ACTION_BT_MUSIC_PLAY".equals(a)) {
+                // The phone *started* music (paused -> playing): make Bluetooth the source so the
+                // radio stops instead of both playing. The phone repeats PLAY while streaming, so
+                // react only to the transition, and never right after the user picked the radio.
+                waitingForPhone = false;
+                boolean started = !btPlaying;
+                btPlaying = true;
+                long sinceRadio = android.os.SystemClock.elapsedRealtime() - Ui.userChoseRadioAt;
+                if (started && Ui.radioIsSource(GreeterService.this) && sinceRadio > 30_000) {
+                    Log.d(TAG, "BT music started over the radio, switching to Bluetooth");
+                    Ui.selectBluetooth(GreeterService.this);
+                }
+            } else if (waitingForPhone) {
+                // Phone connected after ACC on: resume Bluetooth music.
+                waitingForPhone = false;
+                handler.postDelayed(() -> startBluetoothMusic(), 2500);
+            }
+        }
+    };
+
+    // ---------- Keep the audio source across ACC off/on ----------
+
+    /**
+     * The NWD kernel restores the foreground app on ACC on. With this launcher in front that is
+     * "no source", so the radio/BT would stay silent. Remember the real source ourselves.
+     */
+    private void onCarOff() {
+        int src = android.provider.Settings.System.getInt(getContentResolver(), "mcu_current_source", 0);
+        NowPlaying np = NowPlaying.get(this);
+        boolean btPlaying = np.track(NowPlaying.Source.BT).playing;
+        if (btPlaying) src = SRC_BT;
+        // "No source" (0) is what the launcher in front looks like; never let it replace a real source.
+        if (src == 0) {
+            Log.d(TAG, "car off, no source: keeping last=" + prefs().getInt("last_source", 0));
+            return;
+        }
+        prefs().edit().putInt("last_source", src).apply();
+        Log.d(TAG, "car off, last source=" + src);
+    }
+
+    private void onCarOn() {
+        handler.removeCallbacks(restore);
+        handler.postDelayed(restore, 3000);
+        schedule();
+    }
+
+    private void restoreAudio() {
+        if (!Profile.isNwd(this)) return; // NWD source handling only
+        int src = prefs().getInt("last_source", 0);
+        if (src == 0) src = android.provider.Settings.System.getInt(getContentResolver(), "mcu_current_source", 0);
+        // Nothing known yet (first start after installing): default to the FM radio so the car is not silent.
+        if (src == 0) src = SRC_RADIO;
+        Log.d(TAG, "restore audio source=" + src);
+        if (NowPlaying.get(this).track(NowPlaying.Source.BT).playing) {
+            Ui.selectBluetooth(this); // phone already playing: keep Bluetooth
+        } else if (src == SRC_RADIO) {
+            Ui.selectRadio(this, radio);
+            Ui.userChoseRadioAt = 0; // automatic restore: a phone that starts playing may still take over
+        } else if (src == SRC_BT) {
+            if (NowPlaying.get(this).btClient.isPhoneConnected()) startBluetoothMusic();
+            else waitingForPhone = true; // wait for the phone to connect
+        } else if (src == SRC_USB) {
+            Ui.requestSource(this, Ui.SOURCE_MUSIC);
+        }
+    }
+
+    private void startBluetoothMusic() {
+        Ui.selectBluetooth(this);
+        handler.postDelayed(() -> NowPlaying.get(this).btClient.playControl(BtClient.PLAY), 1500);
+    }
+
+    // ---------- Greeting ----------
+
+    private void schedule() {
+        long last = prefs().getLong("last_greet", 0);
+        if (System.currentTimeMillis() - last < MIN_INTERVAL_MS) return;
+        handler.removeCallbacks(greet);
+        handler.postDelayed(greet, DELAY_MS);
+        Weather.fetch(this, w -> { }); // refresh the cache before speaking
+    }
+
+    private final Runnable greet = () -> {
+        if (!Profile.voiceEnabled(this)) return;
+        prefs().edit().putLong("last_greet", System.currentTimeMillis()).apply();
+        List<String> clips = buildMessage();
+        // Recorded clips only for the name they were recorded with; otherwise the device's TTS engine.
+        if (Profile.useRecordedVoice(this)) speak(clips);
+        else speakTts(Speech.text(this, clips), null);
+    };
+
+    private TextToSpeech tts;
+
+    /**
+     * Speaks with the device's TTS engine and then runs {@code then} (may be null). It uses the same
+     * navigation-guidance audio attributes as the recorded clips: that is what makes the NWD kernel
+     * mix the voice over the radio/music instead of leaving it muted or fighting the source.
+     */
+    private void speakTts(String text, Runnable then) {
+        if (tts != null) tts.shutdown();
+        tts = new TextToSpeech(this, status -> {
+            if (status != TextToSpeech.SUCCESS || tts == null) {
+                if (then != null) handler.post(then);
+                return;
+            }
+            java.util.Locale es = new java.util.Locale("es", "US");
+            if (tts.isLanguageAvailable(es) < 0) es = new java.util.Locale("es");
+            tts.setLanguage(es);
+            tts.setAudioAttributes(new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .build());
+            tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                @Override public void onStart(String id) { }
+                @Override public void onDone(String id) { if (then != null) handler.post(then); }
+                @Override public void onError(String id) { if (then != null) handler.post(then); }
+            });
+            Bundle params = new Bundle();
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, params, "greet");
+        });
+    }
+
+    private List<String> buildMessage() {
+        List<String> clips = new ArrayList<>();
+        Calendar now = Calendar.getInstance();
+        int day = now.get(Calendar.DAY_OF_WEEK);
+        int h = now.get(Calendar.HOUR_OF_DAY);
+
+        // Monday: "¡Hola, papacito! Hoy es lunes." Other days: greeting by time of day.
+        if (day == Calendar.MONDAY) clips.add("v_greet_monday");
+        else clips.add(h < 12 ? "v_greet_morning" : h < 19 ? "v_greet_afternoon" : "v_greet_night");
+
+        Weather w = Weather.cached(this);
+        if (w != null) {
+            clips.add("v_cond_" + conditionClip(w.code));
+            int t = Math.max(-5, Math.min(40, w.temp));
+            clips.add(t < 0 ? "v_temp_m" + (-t) : "v_temp_" + t);
+            if (!w.rainNote().isEmpty()) clips.add("tts:" + Speech.rainSoon(w.rainAt));
+        }
+        if (day == Calendar.MONDAY) clips.add("v_maintenance"); // oil, radiator, brake fluid
+        if (Odometer.isConfigured(this)) {
+            int left = Odometer.remainingKm(this);
+            if (left < 0) clips.add("v_oil_due");
+            else if (left <= Odometer.WARN_KM) clips.add("v_oil_soon");
+        }
+        clips.add("v_seatbelt");
+        if (day == Profile.picoPlacaDay(this)) {
+            // Spoken with the device's TTS on every day: the old recorded clip (v_picoplaca) used
+            // the previous name and only knew about Wednesday.
+            clips.add("tts:" + Speech.restriccion(day));
+        }
+        // Papers that expire within a week (or already did).
+        android.content.SharedPreferences docs = getSharedPreferences("docs", MODE_PRIVATE);
+        for (int i = 0; i < DocDates.KEYS.length; i++) {
+            int left = DocDates.daysLeft(docs.getString(DocDates.KEYS[i], ""), now);
+            if (left != DocDates.INVALID && left <= 7) clips.add("tts:" + DocDates.spoken(DocDates.NAMES[i], left));
+        }
+        clips.add("v_careful");
+        return clips;
+    }
+
+    private static String conditionClip(int code) {
+        if (code == 0) return "clear";
+        if (code == 1) return "mostly";
+        if (code == 2) return "partly";
+        if (code == 3) return "cloudy";
+        if (code == 45 || code == 48) return "fog";
+        if (code >= 51 && code <= 57) return "drizzle";
+        if (code >= 61 && code <= 67) return "rain";
+        if ((code >= 71 && code <= 77) || code == 85 || code == 86) return "snow";
+        if (code >= 80 && code <= 82) return "showers";
+        if (code >= 95) return "storm";
+        return "cloudy";
+    }
+
+    /** Plays the clips one after another ("tts:<text>" entries are spoken with TTS in their place). */
+    void speak(List<String> clips) {
+        queue.clear();
+        queue.addAll(clips);
+        Log.d(TAG, "speaking " + clips);
+        playNext();
+    }
+
+    private void playNext() {
+        if (player != null) {
+            player.release();
+            player = null;
+        }
+        if (queue.isEmpty()) return;
+        String name = queue.remove(0);
+        if (name.startsWith("tts:")) {
+            speakTts(name.substring(4), this::playNext);
+            return;
+        }
+        int id = getResources().getIdentifier(name, "raw", getPackageName());
+        if (id == 0) {
+            playNext();
+            return;
+        }
+        player = new MediaPlayer();
+        try {
+            player.setAudioAttributes(new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .build());
+            player.setDataSource(this, android.net.Uri.parse(
+                    "android.resource://" + getPackageName() + "/" + id));
+            player.setOnCompletionListener(mp -> playNext());
+            player.setOnErrorListener((mp, what, extra) -> {
+                playNext();
+                return true;
+            });
+            player.prepare();
+            player.start();
+        } catch (Exception e) {
+            Log.w(TAG, "clip failed", e);
+            playNext();
+        }
+    }
+
+    private SharedPreferences prefs() {
+        return getSharedPreferences("greeter", MODE_PRIVATE);
+    }
+
+    @Override
+    public void onDestroy() {
+        if (instance == this) instance = null;
+        if (tts != null) tts.shutdown();
+        super.onDestroy();
+        unregisterReceiver(events);
+        radio.unbind(this);
+        sound.unbind(this);
+        handler.removeCallbacksAndMessages(null);
+        if (player != null) player.release();
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    /** Starts the service at boot even if the launcher is not shown yet. */
+    public static class BootReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context c, Intent i) {
+            c.startService(new Intent(c, GreeterService.class));
+            c.startService(new Intent(c, VolumeOverlay.class));
+            c.startService(new Intent(c, Odometer.class));
+        }
+    }
+}

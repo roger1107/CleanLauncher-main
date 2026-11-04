@@ -1,0 +1,358 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ProcessList>
+	<!--包名（*.*代表后面带任意的名字）-->
+	<ProcessItem PackName="system*.*">
+	</ProcessItem>
+	
+	<ProcessItem PackName="android.uid.system">
+	</ProcessItem>
+	
+	<ProcessItem PackName="android.ext.services">
+	</ProcessItem>
+	<ProcessItem PackName="powernotkill.com.android.systemui">
+	</ProcessItem>
+	
+	<!--高通平台蓝牙后台系统服务-->
+	<ProcessItem PackName="com.android.bluetooth">
+	</ProcessItem>
+
+	<!--播思的相关程序-->
+	<ProcessItem PackName="com.borqs.*.*">
+	</ProcessItem>
+
+	<!--高通的相关程序-->
+	<ProcessItem PackName="com.qualcomm*.*">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.qti.*.*">
+	</ProcessItem>
+	
+	<!--framework新加的apk-->
+	<ProcessItem PackName="com.nwd.miscapp">
+	</ProcessItem>
+	
+	<!--framework新加的apk-->
+	<ProcessItem PackName="com.nwd.systemmonitor">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.android.*.*">
+	</ProcessItem>
+	
+	<!--扫描服务-->
+	<ProcessItem PackName="com.nwd.media.scanner">
+	</ProcessItem>
+	
+	<!--GPS同步服务-->
+	<ProcessItem PackName="com.nwd.gps.sync">
+	</ProcessItem>
+	
+	<!--CAN服务-->
+	<ProcessItem PackName="powernotkill.com.nwd.can.setting">
+	</ProcessItem>
+	
+	<!--kernel服务和setting服务-->
+	<ProcessItem PackName="com.nwd.kernel.setting">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.nwd.setting.service">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.nwd.restore.memory.navi.gps.reboot">
+	</ProcessItem>
+	
+	<ProcessItem PackName="powernotkill.com.android.setting.gps.monitor">
+	</ProcessItem>
+	
+	<!--倒车服务-->
+	<ProcessItem PackName="powernotkill.com.nwd.backcar">
+	</ProcessItem>
+	
+	<!--dvr服务-->
+	<ProcessItem PackName="com.nwd.dvr.service">
+	</ProcessItem>
+	
+	<!--收音服务-->
+	<ProcessItem PackName="com.nwd.radio.service">
+	</ProcessItem>
+	
+	<!--胎压服务-->
+	<ProcessItem PackName="com.nwd.android.tmpsservice">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.nwd.allapp.assistivetouch.screenshot.calendarwidget">
+	</ProcessItem>
+	
+	<ProcessItem PackName="powernotkill.com.nwd.factory.copy.autoupdate">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.nwd.auto.product.touchstudy">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.nwd.volumeview">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.nwd.android.onekeyclear">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.nwd.voice.analyze">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.nwd.assistivetouch">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.google.process*.*">
+	</ProcessItem>
+
+	<ProcessItem PackName="com.google.android.gms*.*">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.google.android.inputmethod*.*">
+	</ProcessItem>
+
+	<ProcessItem PackName="com.softwinner.miracastReceiver">
+	</ProcessItem>
+	
+	<ProcessItem PackName="android.process.*.*">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.goodocom.gocsdk">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.bt.*.*">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.softwinner.update">
+	</ProcessItem>
+	
+	<ProcessItem PackName="android:userExpericenceService">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.iflytek.inputmethod*.*">
+	</ProcessItem>
+	
+	<ProcessItem PackName="powernotkill.com.nwd.boot.tips">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.nwd.statusbar*.*">
+	</ProcessItem>
+	
+	   
+   <!--鑫洋泉-360-->
+   <ProcessItem PackName="powernotkill.com.ivicar.avm">
+   </ProcessItem>
+	
+	<!--Added by ChenKui for 一键清理不能干掉ADAS应用 on 2016.2.3 start-part-->
+	<ProcessItem PackName="com.movon.fcw*.*">
+	</ProcessItem>
+	<!--Added by ChenKui for 一键清理不能干掉ADAS应用 on 2016.2.3 end-part-->
+	
+	<ProcessItem PackName="powernotkill.com.android.launcher">
+	</ProcessItem>
+	
+	<ProcessItem PackName="powernotkill.com.android.wallpaper*.*">
+	</ProcessItem>
+	
+	<!--注意:如关机会被结束请加上powernotkill前缀-->
+	<ProcessItem PackName="powernotkill.com.bizhi.mogudongtai*.*">
+	</ProcessItem>
+	
+	<ProcessItem PackName="powernotkill.com.nwd.dn.obds*.*">
+	</ProcessItem>
+	
+	<!--同行者的服务-->
+	<ProcessItem PackName="com.txznet.*.*">
+	</ProcessItem>
+
+	<!--滴滴虎的服务-->
+	<ProcessItem PackName="com.glsx.ddbox">
+	</ProcessItem>
+	
+	<!--360服务-->
+	<ProcessItem PackName="powernotkill.com.nwd.carkit360camera">
+	</ProcessItem>
+
+	<!--360服务-->
+	<ProcessItem PackName="powernotkill.com.nwd.hdback.catchpic">
+	</ProcessItem>
+	<!--双录服务-->
+	<ProcessItem PackName="powernotkill.com.nwd.hd2camera">
+	</ProcessItem>
+	
+   <!--添加迪瑞特给的白名单--> 
+   <ProcessItem PackName="powernotkill.com.diret.ford*.*">
+   </ProcessItem>
+   
+   <ProcessItem PackName="powernotkill.com.diret.nwd.can*.*">
+   </ProcessItem>
+   
+   <!--添加语音服务在休眠时不要被kill -Added by ChenKui on 2016-09-03-->
+   <ProcessItem PackName="com.nwd.voice.analyze*.*">
+   </ProcessItem>
+   
+   <!--添加国科威的USB DVR服务在休眠时不要被kill -Added by ChenKui on 2016-09-20-->
+   <ProcessItem PackName="com.nwd.usb.dvr.service">
+   </ProcessItem>
+ 
+   	<!-- 添加思必驰语音相关APK在休眠时不要被kill -Added by ChenKui on 2016-09-28-->
+	<ProcessItem PackName="com.aispeech.aios">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.aispeech.aios.adapter">
+	</ProcessItem>
+	<!-- 添加思必驰语音相关APK在休眠时不要被kill -Added by ChenKui on 2016-09-28-->
+	
+	<!-- 添加信则立定位服务APK在休眠时不要被kill -Added by Suhaisi on 2016-11-21-->
+	<ProcessItem PackName="com.nwd.tcpclient">
+	</ProcessItem>
+	
+	<!-- 添加滴滴虎DDHuVoiceTool APK在休眠时不要被kill -Added by yj.zhang on 2017-3-9-->
+	<ProcessItem PackName="com.nwd.ddhuvoicetool">
+	</ProcessItem>
+	
+	<!-- 添加N3合并进程在休眠时不要被kill -Added by yj.zhang on 2017-3-9-->
+	<ProcessItem PackName="com.nwd.assistivetouch.voiceanalyze">
+	</ProcessItem>
+	
+	<ProcessItem PackName="com.nwd.sendkey.oneclear.gpssynctime">
+	</ProcessItem>
+	
+	<!--FW-王诚要求:在公版和阿里云项目上,非常6+1 USB DVR的进程在acc off时不要被kill-->
+	<ProcessItem PackName="powernotkill.com.synmoon.usbcamera">
+	</ProcessItem>
+	
+	<!--阿里云相关应用在休眠时不能被kill的配置 -Added by ChenKui on 2017-03-28 start-part-->
+	<ProcessItem PackName="com.nwd.aliyunos.define">
+	</ProcessItem>
+
+	<ProcessItem PackName="powernotkill.com.aliyun.ushell">
+	</ProcessItem>
+	
+	<ProcessItem PackName="powernotkill.com.aliyun.bluetoothphone">
+	</ProcessItem>	
+	
+	<ProcessItem PackName="powernotkill.com.aliyun.mobile.ime">
+	</ProcessItem>
+	
+	<ProcessItem PackName="powernotkill.com.yunos.extprovider">
+	</ProcessItem>
+	
+	<ProcessItem PackName="powernotkill.com.yunos.gesturecontrol">
+	</ProcessItem>
+	
+	<ProcessItem PackName="powernotkill.com.yunos4car.music">
+	</ProcessItem>
+	
+	<!--公版的一键清理里面,默认是要kill掉喜马拉雅应用,仅K3001阿里云的客户项目上才不能被kill.(修复:K3001-GLSX项目:休眠后电流调到0.6MA,再开ACC机器重启) Modified by James Chen on 2017.10.12-->
+	<!--<ProcessItem PackName="powernotkill.com.ximalaya.ting.android.car">
+	</ProcessItem>-->
+	<!--阿里云相关应用在休眠时不能被kill的配置 -Added by ChenKui on 2017-03-28 end-part-->
+	
+	<!--测试程序-->
+	<ProcessItem PackName="powernotkill.com.example.testproject">
+	</ProcessItem>	
+	
+	<!--威威车联相关(后台监控)-->
+	<ProcessItem PackName="powernotkill.com.nwd.weiweiclient">
+	</ProcessItem>
+	
+	<!--升级服务-->
+	<ProcessItem PackName="powernotkill.com.nwd.upgrade.mgtservice"/>
+	
+	<!--应用市场服务-->
+	<ProcessItem PackName="powernotkill.com.nwd.carstore.service"/>
+	
+	<!--广告服务-->
+	<ProcessItem PackName="powernotkill.com.nwd.carad.service"/>
+	
+	<!--凯富隆DVR(后台监控)-->
+	<ProcessItem PackName="powernotkill.com.anwensoft.cardvr">
+	</ProcessItem>
+	
+	<!--谷歌注音输入法-->
+	<ProcessItem PackName="powernotkill.com.google.android.apps.inputmethod.zhuyin">
+	</ProcessItem>
+	
+	<!--百度输入法-->
+	<ProcessItem PackName="powernotkill.com.baidu.input">
+	</ProcessItem>
+	
+	<!--超注音输入法-->
+	<ProcessItem PackName="powernotkill.tw.chaozhuyin">
+	</ProcessItem>
+	
+	<ProcessItem PackName="powernotkill.com.nwd.whole.machine">
+	</ProcessItem>
+	
+	<!--地图自动清理-->
+	<ProcessItem PackName="powernotkill.com.nwd.navicleantools">
+	</ProcessItem>
+	
+	<!--检测ICCID程序-->
+	<ProcessItem PackName="powernotkill.com.nwd.checkiccid">
+	</ProcessItem>
+	
+	<!--自动升级-->
+	<ProcessItem PackName="com.nwd.quickupdate">
+	</ProcessItem>
+	
+	<!--百度carlife-->
+	<ProcessItem PackName="powernotkill.com.baidu.carlifevehicle">
+	</ProcessItem>
+	
+	<!--网络共享-->
+	<ProcessItem PackName="powernotkill.net.easyconn.netlink"> 
+	</ProcessItem> 
+  
+	<ProcessItem PackName="powernotkill.com.nwd.audioset">
+	</ProcessItem> 
+  
+	<!--网络共享--> 
+	<ProcessItem PackName="powernotkill.com.android.vpndialogs"> 
+	</ProcessItem>
+
+	<!--激活器-->
+	<ProcessItem PackName="powernotkill.com.allwinnertech.activator"> 
+	</ProcessItem>
+	
+	<ProcessItem PackName="powernotkill.com.nwd.carkithd2cam"> 
+	</ProcessItem>
+  
+	<ProcessItem PackName="powernotkill.com.nwd.android.phone">
+	</ProcessItem>
+	
+	<!--QQ拼音输入法-->
+	<ProcessItem PackName="com.tencent.qqpinyin">
+	</ProcessItem>
+	
+	<!--第三方tvout应用-->
+	<ProcessItem PackName="powernotkill.com.ms.ms2160">
+	</ProcessItem>
+	
+	<!--tvout应用-->
+	<ProcessItem PackName="powernotkill.com.nwd.usb2cvbs">
+	</ProcessItem>
+	
+	<!--HiCar-->
+	<ProcessItem PackName="com.huawei.dmsdpdevice">
+	</ProcessItem>
+	<ProcessItem PackName="com.huawei.hisight">
+	</ProcessItem>
+	<ProcessItem PackName="com.huawei.nearby">
+	</ProcessItem>
+	<ProcessItem PackName="powernotkill.com.nwd.hicar.app">
+	</ProcessItem>
+
+	<!--后台监控相关配置-->
+  <ForceSleepKill PackName="com.qualcomm.qcrilmsgtunnel">
+	</ForceSleepKill>
+	<ForceSleepKill PackName="com.nwd.dn.obds">
+	</ForceSleepKill>
+	<ForceSleepKill PackName="com.nwd.voice.analyze">
+	</ForceSleepKill>
+	<ForceSleepKill PackName="com.letv.leauto.ecolink">
+	</ForceSleepKill>
+	<ForceSleepKill PackName="com.txznet.webchat">
+	</ForceSleepKill>
+	<ForceSleepKill PackName="com.txznet.txz">
+	</ForceSleepKill>
+</ProcessList>

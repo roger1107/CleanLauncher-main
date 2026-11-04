@@ -1,0 +1,90 @@
+[factory_config] - 工厂设置相关配置
+#语音识别开关
+voice_analyze_display=0
+#倒车辅助线或倒车轨迹调节的开关
+backcar_assist_line_adjust=0
+#语音识别激活开关
+voice_analyze_activate=0
+#三色灯设置开关
+three_lamp_setting=0
+#功能开关默认值
+#bit0~bit7依次为:DVD_USB、DVD_SD、DVD_DISC、手机互联、360全景、胎压、TV2、ADAS
+#bit8~bit15依次为:iPod、CVBS_DVR、NEW_USB_DVR、保留、AUX、TV、AUX_REAR、DVR
+default_fun=4608
+#光感开关默认值
+key_light_sensitive_switch=0
+#倒车轨迹开关默认值
+backcar_track=0
+#倒车辅助线开关默认值
+assistline=1
+#面板数据默认值（需填完整路径）
+panel=/nwdappconfig/app/panel/A20_64PIN_GB_New.txt
+#方向盘数据默认值（需填完整路径）
+fxp=none
+#遥控器数据默认值（需填完整路径）
+remote_control=none
+#工厂重置TF卡交换的默认值0默认1交换
+persist.sys.tfpath.flag=0
+#工厂重置I2S开关的默认值0关1开
+persist.sys.i2s=0
+#工厂重置高清倒车默认值(全志平台)0:无 1:pr1000 2:nvp6114 3:nvp6124 4:nvp_two 5:pr2000
+#工厂重置高清倒车默认值(高通平台)0:无 1:pr2000 2:Mipi-25
+persist.sys.nwd.hacamera.ctrl=0
+#串口配置 0:胎压 1:OBD
+uart_fun_mode=2
+#mic增益范围0~7
+key_mic_gain=4
+#倒车视频制式(0 AUTO, 1 PAL, 2 NTSC)
+key_backcar_video_mode=0
+#原车视频制式(0 AUTO, 1 PAL, 2 NTSC)
+key_car_video_mode=0
+#RDS开关(0关1开)
+rds_open=1
+#通信模块(3G模块：WM_3G，广联3G：WM_3G_1，兴可4G：WM_4G_1，广和通4G：WM_4G_2，全志4G：WM_AW4G)
+persist.sys.nwd.mw.ctrl=WM_3G
+#二维码激活开关(0关1开)
+qr_code_activate=0
+#全志平台倒车加速开关(0关1开)
+accelerate_backcar=1
+#车门干扰开关(0关1开)
+car_door_lock_disturb=0
+#双麦回音消除开关(0关1开)
+key_double_mic=1
+#AVM效果优化开关(0关1开)
+key_avm_enable=0
+#倒车无锯齿开关(0关1开)
+persist.sys.backcar.di.enable=0
+#限制应用安装 0表示不限制，1表示限制
+persist.sys.install.enable=0
+#倒车视频羽化等级范围0~5
+smooth_level=0
+#原车启停开关
+key_car_ass=0
+#开机启动界面(无:0,开机logo:1,开机警告语:2)
+key_boot_menu=0
+#高清倒车制式(0为自动，1为AHD，2为TVI，3为NTSC，4为PAL ，5为AHD-1080P)
+key_hd_backcar_standard=1
+#dvr模块类型
+key_dvr_type=0
+#收音模块类型
+key_radio_type=0
+#FM灵敏度类型
+key_radio_sensitivity=0
+#AM灵敏度类型
+key_radio_am_sensitivity=10
+#点灯灵敏度类型
+key_radio_light_sensitivity=0
+#收音天线供电
+key_radio_antenna=0
+#各个增益设置(逗号隔开 导航、蓝牙、DVD、TV、IPod、Aux、Radio、CDC、MP5、Aux2、MHL、3G、原车USB增益、安吉星增益)
+key_audio_gain=2,9,1,5,0,1,6,0,0,1,0,0,3,3
+#倒车遮黑时间
+backcar_show_black_time=400
+#T3蓝牙通话mic增益
+key_bt_mic_gain=6
+#T3蓝牙通话肖回音
+key_bt_echo_sound=100
+#唤醒延时初始化LCD时长(单位ms，步进500，范围0~2500)
+key_delay_init_lcd=900
+#唤醒IPS屏延时时长(单位ms)
+ips_delay_time=2300

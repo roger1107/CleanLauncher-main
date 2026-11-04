@@ -1,0 +1,52 @@
+# 此配置是后台进程管理中关于白名单，黑名单的配置项：
+# 配置包名即可，但也不能随意添加，原则上配置非常紧要和体验性较高的包名
+# 黑名单配置：         black:包名,         black:com.nwd.android.music.ui             ----> 配置后内存不够时要杀(不管是否有配置到白名单中)
+# 白名单配置：         white:包名,         white:com.nwd.android.music.ui             ----> 配置后内存不够时不杀
+# nwd test app
+white:com.nwd.production.test
+white:com.nwd.whole.machine
+white:com.nwd.traversalfile
+white:com.example.memtester
+# nwd app
+white:com.nwd.android.music.ui
+white:com.nwd.android.video.ui
+white:com.nwd.voice.analyze
+white:com.nwd.carkit360camera
+white:com.nwd.carkithd2cam
+white:com.nwd.carkitcamserver
+white:com.nwd.audioset
+white:com.nwd.autotestor
+white:com.nwd.can.setting
+white:com.nwd.can.help
+white:com.nwd.carstore.service
+white:com.nwd.carad.service
+white:com.nwd.weiweiclient
+white:com.bt.bc03
+white:com.nwd.hdback.catchpic
+white:com.nwd.statusbarbottom
+white:com.nwd.statusbartop
+white:com.nwd.android.tmpsservice
+white:com.nwd.usb2cvbs
+# third app
+white:com.autonavi.amapauto
+white:com.txznet.txz
+white:com.txznet.smartadapter
+white:com.txznet.aipal
+white:com.zjinnova.zlink
+white:net.easyconn
+white:com.hiworld.customer.service
+white:com.goyourlife.services
+white:com.ms.ms2160
+white:com.antutu.benchmark.full
+white:com.antutu.ABenchMark
+white:com.mgoogle.android.gms
+white:com.ivicar.avm
+# HiCar
+white:com.nwd.hicar.app
+white:com.huawei.hicar.demoapp
+white:com.huawei.dmsdpdevice
+white:com.huawei.hisight
+white:com.huawei.nearby
+white:com.huawei.authagent
+white:com.huawei.hiviewlite
+
